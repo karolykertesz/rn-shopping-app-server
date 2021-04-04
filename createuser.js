@@ -4,6 +4,8 @@ const { Client } = require("pg");
 const check_is_exist = require("./is_one");
 const { body, validationResult } = require("express-validator");
 const { v4: uuidv4 } = require("uuid");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 const client = new Client({
   connectionString: process.env.POSTGRES_CONN,
   ssl: {
@@ -35,11 +37,12 @@ router.post(
         accessToken: uuidv4(),
       });
     } else {
+      const hashedPassword = await bcrypt.hash(password, saltRounds)
       let query = {
         name: "signup",
         text:
           "INSERT INTO users(uid,email,password) VALUES($1,$2,$3) RETURNING uid,email",
-        values: [uid, email, password],
+        values: [uid, email, hashedPassword],
       };
       const response = await client.query(query);
       if (response.rowCount > 0) {

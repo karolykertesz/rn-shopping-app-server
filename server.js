@@ -7,6 +7,7 @@ const newCard = require("./create_new_card");
 const getAll = require("./getAll");
 const one = require("./one");
 const createuser = require("./createuser");
+const signin = require("./signin");
 const { body, validationResult } = require("express-validator");
 const port = process.env.PORT || 6000;
 
@@ -18,6 +19,7 @@ app.use("/apiadd", newCard);
 app.use("/getall", getAll);
 app.use("/one", one);
 app.use("/createuser", createuser);
+app.use("/signinuser", signin);
 
 const { Client } = require("pg");
 
