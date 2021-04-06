@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 const { body, validationResult } = require("express-validator");
-
+const sendEmail = require("./emailer");
 router.post(
   "/onep",
   body("creditCard").notEmpty().escape().isCreditCard(),
