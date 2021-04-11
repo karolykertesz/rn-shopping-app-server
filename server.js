@@ -8,6 +8,9 @@ const getAll = require("./getAll");
 const one = require("./one");
 const createuser = require("./createuser");
 const signin = require("./signin");
+const google = require("./signUpGoogle");
+const ship = require("./ship");
+const invoice = require("./invoice");
 const { body, validationResult } = require("express-validator");
 const port = process.env.PORT || 6000;
 
@@ -20,7 +23,9 @@ app.use("/getall", getAll);
 app.use("/one", one);
 app.use("/createuser", createuser);
 app.use("/signinuser", signin);
-
+app.use("/in", google);
+app.use("/addshipping", ship);
+app.use("/sendinvoice", invoice);
 const { Client } = require("pg");
 
 const client = new Client({

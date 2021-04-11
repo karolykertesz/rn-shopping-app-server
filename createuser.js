@@ -30,14 +30,11 @@ router.post(
     const is_it_one = await check_is_exist(email);
     let uid = uuidv4();
     if (is_it_one !== null) {
-      return res.status(200).send({
-        uid: is_it_one.uid,
-        email: is_it_one.email,
-        error: "Already Signed Up!",
-        accessToken: uuidv4(),
+      return res.status(400).json({
+        error: "Email Already registered",
       });
     } else {
-      const hashedPassword = await bcrypt.hash(password, saltRounds)
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
       let query = {
         name: "signup",
         text:

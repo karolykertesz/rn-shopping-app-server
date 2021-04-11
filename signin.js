@@ -14,7 +14,7 @@ const client = new Client({
   },
 });
 client.connect();
-router.get(
+router.post(
   "/signin",
   body("email").isEmail().trim().notEmpty(),
   body("password").notEmpty().trim().escape(),
@@ -23,27 +23,40 @@ router.get(
     const password = req.body.password;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res
-        .status(400)
-        .json({ errors: errors.array() })
-        .then(client.end());
+      return res.status(400).json({ errors: errors.array() });
     }
     let query = {
       name: "signup",
-      text: "SELECT email,uid,password FROM users WHERE email=$1",
+      text:
+        "SELECT u.uid,u.email,u.admin,u.password,s.address,s.city,s.zip,s.country,s.state FROM users as u LEFT JOIN shipping AS s on u.uid = s.uid WHERE u.email = $1",
       values: [email],
     };
-    const response = await client.query(query);
-    let pass = await response.rows[0]["password"];
-    if (response.rowCount < 1) {
-      return res.status(400).json({ msg: "Invalid credencial" });
-    }
-    const returnRes = await bcrypt.compareSync(password, pass);
-    if (returnRes) {
-      const { email, uid } = await response.rows[0];
-      return res.status(200).json({ email, uid, accessToken: uuidv4() });
-    } else {
-      return res.status(401).json({ msg: "Invalid credencial" });
+    try {
+      const response = await client.query(query);
+      if (response.rowCount < 1) {
+        return res.status(400).json({ msg: "Invalid credencial" });
+      }
+      let pass = await response.rows[0]["password"];
+      const returnRes = await bcrypt.compareSync(password, pass);
+      if (returnRes) {
+        const { email, uid, admin, city, country, state, zip } = await response
+          .rows[0];
+        return res.status(200).send({
+          email,
+          uid,
+          accessToken: uuidv4(),
+          city,
+          country,
+          state,
+          zip,
+          isAdmin: admin,
+          isDone: city !== null ? true : false,
+        });
+      } else {
+        return res.status(400).send({ msg: "Invalid credencial" });
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 );
